@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workshown — Samuel Borelli</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0a;--s1:#121212;--s2:#1a1a1a;--s3:#222;--bd:#2a2a2a;--bd2:#333;--acc:#b8f043;--txt:#eeeae2;--sub:#999;--mut:#555}
+body{background:var(--bg);color:var(--txt);font-family:'DM Mono',monospace;font-size:14px;max-width:600px;margin:0 auto;padding:48px 24px}
+h1{font-family:'DM Serif Display',serif;font-size:28px;font-weight:400;margin-bottom:6px}
+h1 em{color:var(--acc);font-style:italic}
+p{color:var(--sub);font-size:13px;margin-bottom:32px;line-height:1.6}
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:8px;padding:16px;margin-bottom:12px;display:block;text-decoration:none;color:var(--txt);transition:border-color .15s}
+.card:hover{border-color:var(--acc)}
+.card-title{font-size:15px;margin-bottom:3px}
+.card-desc{font-size:11px;color:var(--mut);line-height:1.5}
+.card-tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.tag{font-size:9px;padding:1px 7px;border-radius:8px;border:1px solid var(--bd);color:var(--sub)}
+.footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--bd);font-size:11px;color:var(--mut)}
+</style>
+</head>
+<body>
+<h1>workshown</h1>
+<p>Project writeups, case studies, and technical deep-dives.</p>
+
+<a class="card" href="deep-research-agent.html">
+  <div class="card-title">Building a research agent that does the work</div>
+  <div class="card-desc">~4 minutes, ~$0.30. A ReAct agent that searches the web, reads pages, and synthesizes findings into structured reports.</div>
+  <div class="card-tags"><span class="tag">agent</span><span class="tag">research</span><span class="tag">ReAct</span></div>
+</a>
+
+<a class="card" href="deep-research-agent-infographic.html">
+  <div class="card-title">Deep research agent · technical infographic</div>
+  <div class="card-desc">System architecture, ReAct loop protocol, tool internals, source quality dashboard, token anatomy, cost model — 8 diagrams.</div>
+  <div class="card-tags"><span class="tag">architecture</span><span class="tag">infographic</span><span class="tag">technical</span></div>
+</a>
+
+<div class="footer">Samuel Borelli · <a href="https://github.com/smellyborelli" style="color:var(--sub);text-decoration:none">github</a></div>
+</body>
+</html>
