@@ -208,9 +208,32 @@ blockquote{
   The cumulative scores are advisory — the model is prompted to use them but nothing enforces it. A proper programmatic gate (pause if score &lt; 40%, or force a scholar-targeted round) would make the quality system drive behavior rather than just annotate it.
 </p>
 
-<hr class="divider">
+<h2>How it compares to the original</h2>
 
-<h2>The stack</h2>
+<p>
+  The core ReAct loop is from Alibaba-NLP/DeepResearch — 19.3k stars, Apache-2.0, a real research achievement with a custom-trained 30B MoE model. Without them, this doesn't exist.
+</p>
+
+<p>
+  But they built a research tool for AI researchers doing literature reviews. Their setup requires running their custom 30B model locally via vLLM — you need GPUs and patience. I built on top of their loop to make something for humans doing practical research.
+</p>
+
+<p>
+  Where it's different:
+</p>
+
+<ul>
+  <li><strong>API-first.</strong> Any OpenAI-compatible provider — DeepSeek, OpenAI, OpenRouter, Claude. One env var swap. No local GPU needed.</li>
+  <li><strong>Dual-pass.</strong> Two differentiated passes instead of one flat one. Practitioner stories from unfiltered search, structured framework from quality-guided search, then merged by LLM synthesis.</li>
+  <li><strong>Source quality.</strong> The original treats all sources equally. Ours classifies every result into 5 tiers — peer-reviewed, scholarly, anecdotal, blog/news, affiliate — with cumulative scoring across rounds.</li>
+  <li><strong>Qualitative-aware.</strong> Tier 3 (anecdotal/interview) is explicitly weighted as valuable. First-hand accounts with real numbers aren't treated as weaker than institutional sources.</li>
+</ul>
+
+<p>
+  It's not better in absolute terms. It's better for the specific problem I'm trying to solve: practical, qualitative research about how things actually work in the real world.
+</p>
+
+<hr class="divider">
 
 <ul>
   <li><strong>Loop:</strong> ReAct protocol from Alibaba-NLP/DeepResearch</li>
@@ -227,7 +250,7 @@ blockquote{
   <a href="deep-research-agent-infographic.html" style="color:var(--sub)">Technical infographic →</a>
 </p>
 <div class="footer">
-  <a href="https://github.com/smellyborelli/deepresearch-skill">github</a> · <a href="index.html">deep research</a>
+  <a href="https://github.com/smellyborelli">github</a> · <a href="index.html">workshown</a>
 </div>
 
 </body>
