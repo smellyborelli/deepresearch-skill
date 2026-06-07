@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deep Research Agent — Technical Infographic</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0a;
+  --s1:#121212;
+  --s2:#1a1a1a;
+  --s3:#222;
+  --bd:#2a2a2a;
+  --bd2:#333;
+  --acc:#b8f043;
+  --acc-dim:rgba(184,240,67,0.08);
+  --red:#ff4d3d;
+  --blu:#5c9eff;
+  --yel:#ffb800;
+  --purp:#b07fff;
+  --ora:#ff8030;
+  --txt:#eeeae2;
+  --sub:#999;
+  --mut:#555;
+}
+body{
+  background:var(--bg);
+  color:var(--txt);
+  font-family:'DM Mono',monospace;
+  font-size:13px;
+  max-width:820px;
+  margin:0 auto;
+  padding:40px 20px 80px;
+  line-height:1.6;
+}
+
+h1{
+  font-family:'DM Serif Display',serif;
+  font-size:30px;
+  font-weight:400;
+  margin-bottom:6px;
+}
+h1 em{color:var(--acc);font-style:italic}
+.meta{color:var(--mut);font-size:11px;margin-bottom:40px}
+
+/* InfoBox / every diagram wrapper */
+.diagram{
+  background:var(--s1);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  padding:24px 28px;
+  margin-bottom:32px;
+}
+.diagram-title{
+  font-family:'DM Serif Display',serif;
+  font-size:17px;
+  margin-bottom:4px;
+  color:var(--txt);
+}
+.diagram-sub{
+  font-size:11px;
+  color:var(--mut);
+  margin-bottom:18px;
+}
+
+/* FLEX ROW for flow diagrams */
+.flow-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.block{
+  background:var(--s2);
+  border:1px solid var(--bd2);
+  border-radius:6px;
+  padding:10px 14px;
+  text-align:center;
+  min-width:70px;
+  font-size:11px;
+  line-height:1.4;
+}
+.block .name{font-weight:500;color:var(--txt)}
+.block .kind{color:var(--mut);font-size:10px;margin-top:2px}
+.block.acc{border-color:var(--acc);background:var(--acc-dim)}
+.block.blu{border-color:var(--blu);background:rgba(92,158,255,0.06)}
+.block.red{border-color:var(--red);background:rgba(255,77,61,0.06)}
+.block.purp{border-color:var(--purp);background:rgba(176,127,255,0.06)}
+.block.yel{border-color:var(--yel);background:rgba(255,184,0,0.06)}
+.block.ora{border-color:var(--ora);background:rgba(255,128,48,0.06)}
+
+.arrow{color:var(--mut);font-size:14px;flex-shrink:0;padding:0 2px}
+.arrow-label{font-size:9px;color:var(--mut);text-align:center;margin-top:-2px}
+
+/* VERTICAL / STACK */
+.stack{display:flex;flex-direction:column;align-items:center;gap:4px}
+
+/* BADGE / TAG */
+.tag{
+  display:inline-block;
+  font-size:9px;
+  padding:1px 7px;
+  border-radius:8px;
+  border:1px solid var(--bd);
+  color:var(--sub);
+}
+.tag.blue{border-color:rgba(92,158,255,0.3);color:var(--blu);background:rgba(92,158,255,0.06)}
+.tag.green{border-color:rgba(184,240,67,0.3);color:var(--acc);background:var(--acc-dim)}
+.tag.red{border-color:rgba(255,77,61,0.3);color:var(--red);background:rgba(255,77,61,0.06)}
+.tag.yel{border-color:rgba(255,184,0,0.3);color:var(--yel);background:rgba(255,184,0,0.06)}
+
+/* CODE LINE */
+.code-line{
+  background:var(--s2);
+  border:1px solid var(--bd);
+  border-radius:5px;
+  padding:6px 10px;
+  font-size:11px;
+  font-family:'DM Mono',monospace;
+  color:var(--acc);
+  line-height:1.5;
+  overflow-x:auto;
+  white-space:nowrap;
+}
+.code-line .dim{color:var(--mut)}
+.code-line .str{color:var(--yel)}
+.code-line .key{color:var(--blu)}
+.code-line .comment{color:var(--mut);font-style:italic}
+
+/* XML block */
+.xml-block{
+  background:var(--s2);
+  border:1px solid var(--bd2);
+  border-radius:6px;
+  padding:12px 16px;
+  font-size:11px;
+  font-family:'DM Mono',monospace;
+  line-height:1.6;
+  overflow-x:auto;
+}
+.xml-block .tag-name{color:var(--blu)}
+.xml-block .attr{color:var(--yel)}
+.xml-block .val{color:var(--acc)}
+.xml-block .comment{color:var(--mut);font-style:italic}
+.xml-block .highlight{background:var(--acc-dim);border-radius:2px;padding:0 3px}
+
+/* COMPARISON TABLE */
+.comp-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+.comp-table th{
+  text-align:left;
+  font-weight:500;
+  color:var(--sub);
+  border-bottom:1px solid var(--bd);
+  padding:8px 10px;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:0.05em;
+}
+.comp-table td{
+  padding:10px;
+  border-bottom:1px solid var(--bd);
+  vertical-align:top;
+}
+.comp-table tr:last-child td{border-bottom:none}
+.comp-table .metric{color:var(--sub);white-space:nowrap;width:120px}
+.comp-table .val{color:var(--txt)}
+.comp-table .vs{color:var(--mut);text-align:center;width:40px}
+
+/* DATA ROW small multiples */
+.multi-row{
+  display:flex;gap:10px;flex-wrap:wrap;margin:12px 0;
+}
+.multi-card{
+  flex:1;min-width:120px;
+  background:var(--s2);border:1px solid var(--bd);border-radius:7px;
+  padding:12px;text-align:center;
+}
+.multi-card .num{font-family:'DM Serif Display',serif;font-size:22px;color:var(--acc);margin-bottom:2px}
+.multi-card .num.red{color:var(--red)}
+.multi-card .num.blue{color:var(--blu)}
+.multi-card .num.yel{color:var(--yel)}
+.multi-card .num.purp{color:var(--purp)}
+.multi-card .lbl{font-size:10px;color:var(--mut)}
+
+/* TOOL STEP */
+.tool-step{
+  display:flex;gap:12px;align-items:flex-start;
+  padding:10px 0;
+  border-bottom:1px solid var(--bd);
+}
+.tool-step:last-child{border-bottom:none}
+.tool-step .step-num{
+  width:22px;height:22px;
+  background:var(--s2);border:1px solid var(--bd2);border-radius:5px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:var(--sub);flex-shrink:0;margin-top:1px;
+}
+.tool-step .step-body{flex:1}
+.tool-step .step-title{font-size:12px}
+.tool-step .step-detail{font-size:10px;color:var(--mut);margin-top:2px}
+
+/* SOURCE TIER ROW */
+.tier-row{display:flex;gap:6px;margin:10px 0;flex-wrap:wrap}
+.tier{
+  flex:1;min-width:100px;
+  padding:10px;border-radius:6px;
+  font-size:11px;text-align:center;
+  border:1px solid var(--bd);
+  background:var(--s2);
+}
+.tier .t-label{font-size:9px;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px}
+.tier .t-score{font-size:18px;font-family:'DM Serif Display',serif;margin-bottom:2px}
+.tier .t-desc{font-size:9px;color:var(--mut);line-height:1.3}
+.tier.t1{border-color:rgba(184,240,67,0.4);background:rgba(184,240,67,0.05)}
+.tier.t1 .t-score{color:var(--acc)}
+.tier.t2{border-color:rgba(92,158,255,0.4);background:rgba(92,158,255,0.05)}
+.tier.t2 .t-score{color:var(--blu)}
+.tier.t3{border-color:rgba(255,184,0,0.4);background:rgba(255,184,0,0.05)}
+.tier.t3 .t-score{color:var(--yel)}
+.tier.t4{border-color:rgba(255,128,48,0.4);background:rgba(255,128,48,0.05)}
+.tier.t4 .t-score{color:var(--ora)}
+.tier.t5{border-color:rgba(255,77,61,0.4);background:rgba(255,77,61,0.05)}
+.tier.t5 .t-score{color:var(--mut)}
+.tier.t5 .t-score{color:var(--red)}
+
+/* MESSAGE CONVO */
+.convo{font-size:11px;font-family:'DM Mono',monospace;line-height:1.6}
+.convo .turn{margin-bottom:8px}
+.convo .role{font-size:9px;text-transform:uppercase;letter-spacing:0.05em;color:var(--mut)}
+.convo .user-msg{color:var(--txt)}
+.convo .assistant-msg{color:var(--sub)}
+.convo .tag-b{color:var(--blu)}
+.convo .tag-g{color:var(--acc)}
+.convo .tag-r{color:var(--red)}
+.convo .indent{padding-left:12px}
+
+/* CUMULATIVE BAR */
+.cumulative-bar{
+  display:flex;height:20px;border-radius:4px;overflow:hidden;margin:10px 0;
+}
+.cumulative-bar .seg{display:flex;align-items:center;justify-content:center;font-size:8px;color:#0a0a0a;font-weight:500;transition:width .3s}
+.cumulative-bar .seg.t1{background:var(--acc)}
+.cumulative-bar .seg.t2{background:var(--blu)}
+.cumulative-bar .seg.t3{background:var(--yel)}
+.cumulative-bar .seg.t4{background:var(--ora)}
+
+/* INFO ROW label+value */
+.info-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bd);font-size:11px}
+.info-row:last-child{border-bottom:none}
+.info-row .label{color:var(--sub)}
+.info-row .value{color:var(--txt)}
+
+p{color:var(--sub);font-size:12px;margin-bottom:12px;line-height:1.5}
+</style>
+</head>
+<body>
+
+<h1>Deep research agent · <em>technical</em></h1>
+<div class="meta">Dual-pass system, architecture, protocol flow, tool internals, source quality engine &amp; cost model</div>
+
+<!-- ============================================================ -->
+<!-- 1. SYSTEM ARCHITECTURE -->
+<!-- ============================================================ -->
+<div class="diagram">
+<div class="diagram-title">1 — System architecture</div>
+<div class="diagram-sub">How a user query flows through the system. Each layer is a separate concern.</div>
+
+<div style="display:flex;flex-direction:column;gap:16px">
+
+  <!-- LAYER: User -->
+  <div style="text-align:center">
+    <div class="block" style="display:inline-block;min-width:120px">
+      <div class="name">User query</div>
+      <div class="kind">"research X"</div>
+    </div>
+  </div>
+
+  <div class="flow-row" style="gap:3px">
+    <span class="arrow" style="font-size:20px">↓</span>
+  </div>
+
+  <!-- LAYER: Entry points -->
+  <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
+    <div class="block acc" style="min-width:160px">
+      <div class="name">dual_pass.py</div>
+      <div class="kind">Recommended · Two passes + synthesis</div>
+    </div>
+    <div class="block" style="min-width:140px">
+      <div class="name">harness.py</div>
+      <div class="kind">Single pass (quality optional)</div>
+    </div>
+    <div class="block blu" style="min-width:140px">
+      <div class="name">mcp_server.py</div>
+      <div class="kind">Wraps harness · Async jobs</div>
+    </div>
+  </div>
+
+  <div class="flow-row" style="gap:3px">
+    <span class="arrow" style="font-size:20px">↓</span>
+    <div style="text-align:center;font-size:9px;color:var(--mut);padding:2px 8px">dual_pass orchestrates two harness runs + LLM synthesis</div>
+    <span class="arrow" style="font-size:20px">↓</span>
+  </div>
+
+  <!-- LAYER: Agent -->
+  <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
+    <div class="block purp" style="min-width:180px">
+      <div class="name">TongyiDeepResearchAgent</div>
+      <div class="kind">subclasses MultiTurnReactAgent</div>
+    </div>
+  </div>
+
+  <!-- Branch row -->
+  <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap">
+
+    <!-- LEFT: Tools -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div class="arrow">↓</div>
+      <div class="block red" style="min-width:120px">
+        <div class="name">Search (Serper)</div>
+        <div class="kind">Web search API</div>
+      </div>
+      <div class="block red" style="min-width:120px">
+        <div class="name">Visit (Jina.ai)</div>
+        <div class="kind">Page reader + LLM extract</div>
+      </div>
+      <div class="block red" style="min-width:120px">
+        <div class="name">Scholar (Serper)</div>
+        <div class="kind">Academic search</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: LLM -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div class="arrow">↓</div>
+      <div class="block yel" style="min-width:160px">
+        <div class="name">LLM (DeepSeek / OpenAI)</div>
+        <div class="kind">OpenAI-compatible API</div>
+      </div>
+      <div style="color:var(--mut);font-size:10px;text-align:center">
+        <code>BASE_URL</code> + <code>API_KEY</code> → any provider
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM: Data store -->
+  <div style="display:flex;justify-content:center;gap:10px">
+    <div class="block" style="min-width:180px">
+      <div class="name">output / Report.md</div>
+      <div class="kind">Final answer saved to disk</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 2. DUAL-PASS SYSTEM -->
+<!-- ============================================================ -->
+<div class="diagram">
+<div class="diagram-title">2 — Dual-pass research system</div>
+<div class="diagram-sub">The recommended workflow. Two passes with different source quality modes, merged by an LLM synthesis step.</div>
+
+<div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+
+  <div class="block acc" style="min-width:200px">
+    <div class="name">dual_pass.py</div>
+    <div class="kind">Entry point — orchestrates both passes</div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <!-- Branch -->
+  <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap">
+
+    <!-- Pass A -->
+    <div style="flex:1;min-width:220px;max-width:300px;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;padding:12px">
+      <div style="text-align:center;font-size:11px;font-weight:500;margin-bottom:8px;color:var(--yel)">Pass A — Practitioner stories</div>
+      <div style="font-size:10px;color:var(--sub);margin-bottom:6px">ENABLE_SOURCE_QUALITY=<strong style="color:var(--red)">false</strong></div>
+      <ul style="font-size:10px;color:var(--mut);margin:0;padding:0">
+        <li style="padding:2px 0 2px 12px;position:relative;list-style:none;::before{content:'•'}">Broad, unfiltered web search</li>
+        <li style="padding:2px 0 2px 12px;position:relative;list-style:none">No source classification</li>
+        <li style="padding:2px 0 2px 12px;position:relative;list-style:none">No dashboard or scoring</li>
+        <li style="padding:2px 0 2px 12px;position:relative;list-style:none">Rich in named examples, numbers</li>
+      </ul>
+      <div style="margin-top:6px;font-size:9px;color:var(--mut)">→ output/*_PassA.md</div>
+    </div>
+
+    <!-- Pass B -->
+    <div style="flex:1;min-width:220px;max-width:300px;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;padding:12px">
+      <div style="text-align:center;font-size:11px;font-weight:500;margin-bottom:8px;color:var(--blu)">Pass B — Structured framework</div>
+      <div style="font-size:10px;color:var(--sub);margin-bottom:6px">ENABLE_SOURCE_QUALITY=<strong style="color:var(--acc)">true</strong></div>
+      <ul style="font-size:10px;color:var(--mut);margin:0;padding:0">
+        <li style="padding:2px 0 2px 12px">Quality-guided search</li>
+        <li style="padding:2px 0 2px 12px">Tier classification per result</li>
+        <li style="padding:2px 0 2px 12px">Cumulative scoring across rounds</li>
+        <li style="padding:2px 0 2px 12px">Structured framework output</li>
+      </ul>
+      <div style="margin-top:6px;font-size:9px;color:var(--mut)">→ output/*_PassB.md</div>
+    </div>
+  </div>
+
+  <!-- Synthesis -->
+  <div class="arrow">↓</div>
+  <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
+    <div class="block purp" style="min-width:220px">
+      <div class="name">LLM Synthesis</div>
+      <div class="kind">Merges Pass A stories into Pass B's structure → output/*_Report.md</div>
+    </div>
+  </div>
+
+  <div style="font-size:10px;color:var(--mut);margin-top:4px">
+    Both runs share the same API key and rate limits. Recovery: if a pass fails, partial output is preserved and no synthesis is attempted — the user can manually merge.
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 3. REACT LOOP — DETAILED -->
+<!-- ============================================================ -->
+<div class="diagram">
+<div class="diagram-title">3 — The ReAct loop (message-level)</div>
+<div class="diagram-sub">Every round: model decides → tool executes → result feeds back. The loop drives itself.</div>
+
+<div style="display:flex;gap:16px;flex-wrap:wrap">
+  <!-- LEFT: Protocol -->
+  <div style="flex:1.3;min-width:320px">
+    <div class="xml-block">
+      <div class="turn">
+        <div class="role" style="color:var(--blu)">SYSTEM (pinned)</div>
+        <div class="indent" style="color:var(--sub)">You are a deep research assistant...</div>
+        <div class="indent" style="color:var(--mut);font-size:10px">Tool definitions in XML<br>Source Quality Dashboard rules<br>response protocol instructions</div>
+      </div>
+      <div class="turn">
+        <div class="role" style="color:var(--acc)">USER</div>
+        <div class="indent user-msg">"Research how regular people get jobs"</div>
+      </div>
+      <div class="turn">
+        <div class="role" style="color:var(--mut)">MODEL (ROUND 1)</div>
+        <div class="indent">
+          <span class="tag-b">&lt;tool_call&gt;</span><br>
+          <span class="indent">{<span class="tag-g">"name"</span>: <span class="tag-r">"search"</span>, <span class="tag-g">"arguments"</span>: {<span class="tag-g">"query"</span>: [<span class="tag-r">"cold email job success stories reddit"</span>]}}</span><br>
+          <span class="tag-b">&lt;/tool_call&gt;</span>
+        </div>
+      </div>
+      <div class="turn">
+        <div class="role" style="color:var(--mut)">TOOL (executes locally)</div>
+        <div class="indent">
+          <span class="tag-b">&lt;tool_response&gt;</span><br>
+          <span class="indent" style="color:var(--sub)">→ Serper.dev API → 10 search results</span><br>
+          <span class="indent" style="color:var(--sub)">→ Source Quality Dashboard appended</span><br>
+          <span class="tag-b">&lt;/tool_response&gt;</span>
+        </div>
+      </div>
+      <div class="turn">
+        <div class="role" style="color:var(--mut)">MODEL (ROUND 2)</div>
+        <div class="indent">
+          <span class="tag-b">&lt;tool_call&gt;</span><br>
+          <span class="indent">{<span class="tag-g">"name"</span>: <span class="tag-r">"visit"</span>, <span class="tag-g">"arguments"</span>: {<span class="tag-g">"url"</span>: [<span class="tag-r">"https://..."</span>], <span class="tag-g">"goal"</span>: <span class="tag-r">"extract specific job-finding stories"</span>}}</span><br>
+          <span class="tag-b">&lt;/tool_call&gt;</span>
+        </div>
+      </div>
+      <div class="turn">
+        <div class="role" style="color:var(--mut)">MODEL (FINAL)</div>
+        <div class="indent">
+          <span class="tag-b" style="color:var(--acc)">&lt;answer&gt;</span><br>
+          <span class="indent" style="color:var(--sub)">Synthesized report with sources...</span><br>
+          <span class="tag-b" style="color:var(--acc)">&lt;/answer&gt;</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Loop diagram -->
+  <div style="flex:1;min-width:200px">
+    <div style="background:var(--s2);border:1px solid var(--bd2);border-radius:8px;padding:16px">
+      <div style="text-align:center;font-size:11px;color:var(--sub);margin-bottom:12px">Loop state machine</div>
+      <svg viewBox="0 0 220 240" style="width:100%;max-width:220px;display:block;margin:0 auto">
+        <!-- Start -->
+        <ellipse cx="110" cy="20" rx="35" ry="12" fill="var(--s3)" stroke="var(--acc)" stroke-width="1.5"/>
+        <text x="110" y="24" text-anchor="middle" fill="var(--acc)" font-size="9" font-family="DM Mono">START</text>
+
+        <!-- Arrow: start to send -->
+        <path d="M110 32 L110 52" stroke="var(--mut)" stroke-width="1.2" marker-end="url(#a)"/>
+
+        <!-- Send messages -->
+        <rect x="55" y="52" width="110" height="28" rx="5" fill="var(--s3)" stroke="var(--blu)" stroke-width="1.2"/>
+        <text x="110" y="70" text-anchor="middle" fill="var(--blu)" font-size="8" font-family="DM Mono">Send msgs to LLM</text>
+
+        <!-- Arrow: send to parse -->
+        <path d="M110 80 L110 100" stroke="var(--mut)" stroke-width="1.2" marker-end="url(#a)"/>
+
+        <!-- Parse response -->
+        <rect x="45" y="100" width="130" height="28" rx="5" fill="var(--s3)" stroke="var(--yel)" stroke-width="1.2"/>
+        <text x="110" y="118" text-anchor="middle" fill="var(--yel)" font-size="8" font-family="DM Mono">Parse &lt;tool_call&gt;</text>
+
+        <!-- Branch -->
+        <path d="M110 128 L110 145" stroke="var(--mut)" stroke-width="1.2" marker-end="url(#a)"/>
+
+        <!-- Diamond: tool or answer? -->
+        <polygon points="110,145 145,165 110,185 75,165" fill="var(--s3)" stroke="var(--sub)" stroke-width="1.2"/>
+        <text x="110" y="169" text-anchor="middle" fill="var(--sub)" font-size="7" font-family="DM Mono">tool?</text>
+
+        <!-- Left: tool call -->
+        <path d="M75 165 L40 165 L40 200 L55 200" stroke="var(--red)" stroke-width="1.2" fill="none" marker-end="url(#a)"/>
+        <text x="42" y="158" fill="var(--red)" font-size="7" font-family="DM Mono">yes</text>
+
+        <rect x="55" y="195" width="110" height="28" rx="5" fill="var(--s3)" stroke="var(--red)" stroke-width="1.2"/>
+        <text x="110" y="213" text-anchor="middle" fill="var(--red)" font-size="7" font-family="DM Mono">Execute tool locally</text>
+
+        <!-- Loop back -->
+        <path d="M165 209 L200 209 L200 66 L165 66" stroke="var(--mut)" stroke-width="1" fill="none" stroke-dasharray="3,2" marker-end="url(#a)"/>
+        <text x="202" y="140" fill="var(--mut)" font-size="6" font-family="DM Mono" transform="rotate(90,202,140)">append tool_response</text>
+
+        <!-- Right: answer -->
+        <path d="M145 165 L180 165 L180 235 L110 235" stroke="var(--acc)" stroke-width="1.2" fill="none" marker-end="url(#a)"/>
+        <text x="178" y="158" fill="var(--acc)" font-size="7" font-family="DM Mono">no</text>
+
+        <rect x="55" y="228" width="110" height="24" rx="5" fill="var(--s3)" stroke="var(--acc)" stroke-width="1.2"/>
+        <text x="110" y="243" text-anchor="middle" fill="var(--acc)" font-size="8" font-family="DM Mono">Extract &lt;answer&gt;</text>
+
+        <defs>
+          <marker id="a" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
+            <path d="M0,0 L6,2 L0,4 Z" fill="var(--mut)"/>
+          </marker>
+        </defs>
+      </svg>
+
+      <div style="margin-top:12px;font-size:10px;color:var(--mut);text-align:center">
+        Max 50 rounds (±8 typical)<br>
+        Stop on <code style="font-size:9px">&lt;answer&gt;</code> or max rounds
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- 3. TOOL INTERNALS -->
+<!-- ============================================================ -->
+<div class="diagram">
+<div class="diagram-title">4 — Tool internals</div>
+<div class="diagram-sub">Two primary tools and what they produce.</div>
+
+<div style="display:flex;gap:14px;flex-wrap:wrap">
+
+  <!-- SEARCH -->
+  <div style="flex:1;min-width:280px;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;padding:16px">
+    <div style="font-size:13px;margin-bottom:4px">Search <span class="tag" style="font-size:9px;vertical-align:middle">Serper.dev</span></div>
+    <div style="font-size:10px;color:var(--mut);margin-bottom:12px">Google search via HTTPS API</div>
+
+    <div style="font-size:10px;color:var(--sub);margin-bottom:6px">Input</div>
+    <div class="code-line" style="font-size:10px;white-space:normal;margin-bottom:12px">
+      {<span class="key">query</span>: [<span class="str">"cold email rates 2026"</span>, <span class="str">"outreach conversion data"</span>],<br>
+      &nbsp;<span class="key">cumulative_scores</span>: {<span class="key">tier1_count</span>: <span class="val">3</span>, <span class="key">tier2_count</span>: <span class="val">5</span>, <span class="key">total_possible</span>: <span class="val">84</span>}}
+    </div>
+
+    <div style="font-size:10px;color:var(--sub);margin-bottom:6px">What it does</div>
+    <div class="tool-step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">POST to google.serper.dev/search</div>
+        <div class="step-detail">With API key, query, location (US/China based on content language), 5 retries with exponential backoff</div>
+      </div>
+    </div>
+    <div class="tool-step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Parse organic results → web_snippets</div>
+        <div class="step-detail">Extracts title, URL, date published, source, snippet. Filters out video placeholders.</div>
+      </div>
+    </div>
+    <div class="tool-step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Append Source Quality Dashboard</div>
+        <div class="step-detail">Scores each result by tier, updates cumulative running count, appends to response. Skipped when <code>ENABLE_SOURCE_QUALITY=false</code>.</div>
+      </div>
+    </div>
+
+    <div style="font-size:10px;color:var(--sub);margin-top:8px;margin-bottom:4px">Output</div>
+    <div class="code-line" style="font-size:10px;white-space:normal">
+      A Google search for 'cold email rates 2026' found 10 results:<br><br>
+      1. [<span class="str">Cold Email Benchmarks 2026</span>](https://...)<br>
+      Date published: Mar 2026<br>
+      Source: Instantly<br>
+      Average cold email reply rate: 3.4% across 100M+ emails<br><br>
+      ... (all 10 results) ...<br><br>
+      SOURCE_QUALITY_DASHBOARD: ...<br>
+      CUMULATIVE_SCORES:{"tier1_count":0, "tier2_count":2, "tier3_count":1, "tier4_count":7, ...}
+    </div>
+  </div>
+
+  <!-- VISIT -->
+  <div style="flex:1;min-width:280px;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;padding:16px">
+    <div style="font-size:13px;margin-bottom:4px">Visit <span class="tag blue" style="font-size:9px;vertical-align:middle">Jina.ai + LLM</span></div>
+    <div style="font-size:10px;color:var(--mut);margin-bottom:12px">Page reader with AI extraction</div>
+
+    <div style="font-size:10px;color:var(--sub);margin-bottom:6px">Input</div>
+    <div class="code-line" style="font-size:10px;white-space:normal;margin-bottom:12px">
+      {<span class="key">url</span>: [<span class="str">"https://example.com/article"</span>],<br>
+      &nbsp;<span class="key">goal</span>: <span class="str">"Extract specific job-finding methodology"</span>}
+    </div>
+
+    <div style="font-size:10px;color:var(--sub);margin-bottom:6px">What it does</div>
+    <div class="tool-step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">GET r.jina.ai/{url}</div>
+        <div class="step-detail">Jina.ai Reader API → page as markdown. Up to 3 retries with 50s timeout. Falls back to alternative parser.</div>
+      </div>
+    </div>
+    <div class="tool-step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Truncate to 95K tokens</div>
+        <div class="step-detail">Uses tiktoken cl100k_base encoding. Long pages are truncated — not split, just the first N tokens.</div>
+      </div>
+    </div>
+    <div class="tool-step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">LLM extract: EXTRACTOR_PROMPT</div>
+        <div class="step-detail">Secondary LLM call with the extraction prompt. Returns JSON: {rational, evidence, summary}. Extractor retries up to 3 times if output is too short, truncating content 70% each retry.</div>
+      </div>
+    </div>
+
+    <div style="font-size:10px;color:var(--sub);margin-top:8px;margin-bottom:4px">Output</div>
+    <div class="code-line" style="font-size:10px;white-space:normal">
+      The useful information in {url} for user goal {goal} as follows:<br><br>
+      Evidence in page:<br>
+      "The user sent 847 cold emails, received 94 responses...<br>
+      eventually converting 10 into paying customers. Each customer cost approximately 85 emails and 14 hours of work."<br><br>
+      Summary:<br>
+      "Manual cold email outreach at scale can yield 1.2% conversion..."
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 4. SOURCE QUALITY DASHBOARD -->
+<!-- ============================================================ -->
+<div class="diagram">
+<div class="diagram-title">5 — Source Quality Dashboard</div>
+<div class="diagram-sub">Every search result is scored by credibility tier. Running cumulative score tracks coverage across rounds.</div>
+
+<p>
+  The main custom code is <code>source_quality.py</code> — a 417-line classification engine that runs on
+  every search result. Each result's domain, URL path, and snippet are checked against known academic
+  publishers, government TLDs, institutional domains, affiliate patterns, anecdotal keywords, and
+  platform hosts. A tier label, score, per-batch dashboard, and cumulative running total are appended
+  to every search tool response.
+</p>
+<p>
+  The cumulative score is carried across rounds via a structured state-passing pattern — the model
+  passes the JSON blob from the last dashboard as <code>cumulative_scores</code> in its next search
+  call's arguments. The code merges the new batch and hands back the updated tally. If the model
+  forgets, it starts fresh — no functional breakage.
+</p>
+<p>
+  The entire system can be toggled off with <code>ENABLE_SOURCE_QUALITY=false</code> — the agent runs
+  exactly like the base Alibaba code, no classification, no dashboard. This toggle is how the dual-pass
+  runner switches between its two research modes.
+</p>
+
+<!-- TIERS -->
+<div class="tier-row">
+  <div class="tier t1">
+    <div class="t-label">tier 1</div>
+    <div class="t-score">5 pts</div>
+    <div class="t-desc">Peer-reviewed<br>Strongest evidence</div>
+  </div>
+  <div class="tier t2">
+    <div class="t-label">tier 2</div>
+    <div class="t-score">4 pts</div>
+    <div class="t-desc">Scholarly/Gov<br>Institutional sources</div>
+  </div>
+  <div class="tier t3">
+    <div class="t-label">tier 3</div>
+    <div class="t-score">3 pts</div>
+    <div class="t-desc">Anecdotal/Interview<br>First-hand accounts</div>
+  </div>
+  <div class="tier t4">
+    <div class="t-label">tier 4</div>
+    <div class="t-score">2 pts</div>
+    <div class="t-desc">Blog/News<br>General reporting</div>
+  </div>
+  <div class="tier t5">
+    <div class="t-label">tier 5</div>
+    <div class="t-score">0 pts</div>
+    <div class="t-desc">Affiliate/Product<br>Discarded</div>
+  </div>
+</div>
+
+<p style="margin-top:4px">
+  <strong>Note:</strong> Tier 3 (anecdotal/interview) is explicitly called out in the system prompt
+  as "often the most useful for real-world, practical research" — the model is encouraged to
+  value qualitative sources appropriately rather than treating them as inherently weaker.
+</p>
+
+<!-- CUMULATIVE SCORE EXAMPLE -->
+<div style="margin-top:14px">
+  <div style="font-size:11px;color:var(--sub);margin-bottom:6px">Cumulative score after 3 search rounds (weighted tool response appended to every result):</div>
+
+  <div class="cumulative-bar" style="max-width:400px">
+    <div class="seg t1" style="width:8%">T1</div>
+    <div class="seg t2" style="width:14%">T2</div>
+    <div class="seg t3" style="width:24%">T3</div>
+    <div class="seg t4" style="width:54%">T4</div>
+  </div>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:10px;color:var(--mut)">
+    <div>tier1_count: 3 · score: 15</div>
+    <div>tier2_count: 5 · score: 20</div>
+    <div>tier3_count: 8 · score: 24</div>
+    <div>tier4_count: 15 · score: 30</div>
+    <div>total_possible: 124 · weighted: 72%</div>
+  </div>
+
+  <div style="margin-top:12px;font-size:11px;background:var(--acc-dim);border:1px solid rgba(184,240,67,0.2);border-radius:6px;padding:10px">
+    <strong style="color:var(--acc)">Guidance in the system prompt (not enforced):</strong><br>
+    >70% → strong coverage, may proceed to answer<br>
+    &lt;40% after several rounds → try targeted searches (scholar, academic domains)<br>
+    Two consecutive rounds with no new Tier 1–3 sources → source landscape likely exhausted<br>
+    <span style="color:var(--sub)">Low score is NOT a failure — the report can note the source landscape honestly.</span>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 5. TOKEN ANATOMY -->
+<!-- ============================================================ -->
+<div class="diagram">
+<div class="diagram-title">6 — Token anatomy per round</div>
+<div class="diagram-sub">What fills up the context window each iteration. The context window grows with every round.</div>
+
+<div style="display:flex;gap:14px;flex-wrap:wrap">
+  <div style="flex:1;min-width:200px">
+    <h3 style="font-size:12px;font-weight:500;margin-bottom:8px;color:var(--sub)">Each round adds:</h3>
+    <div class="info-row"><span class="label">System prompt (pinned)</span><span class="value">~800 tokens</span></div>
+    <div class="info-row"><span class="label">User query</span><span class="value">~30 tokens</span></div>
+    <div class="info-row"><span class="label">Model tool call</span><span class="value">~40-80 tokens</span></div>
+    <div class="info-row"><span class="label">Search response (10 results)</span><span class="value">~800-1500 tokens</span></div>
+    <div class="info-row"><span class="label">Visit response (1 page)</span><span class="value">~400-600 tokens</span></div>
+    <div class="info-row"><span class="label">Report generation</span><span class="value">~1500-3000 tokens</span></div>
+  </div>
+  <div style="flex:1;min-width:200px">
+    <h3 style="font-size:12px;font-weight:500;margin-bottom:8px;color:var(--sub)">Typical session (8 rounds)</h3>
+    <div class="info-row"><span class="label">Total input tokens</span><span class="value">~15K-25K</span></div>
+    <div class="info-row"><span class="label">Total output tokens</span><span class="value">~2K-4K</span></div>
+    <div class="info-row"><span class="label">DeepSeek V4 cost</span><span class="value" style="color:var(--acc)">~$0.30</span></div>
+    <div class="info-row"><span class="label">OpenAI GPT-4o cost</span><span class="value" style="color:var(--yel)">~$0.50-$1.00</span></div>
+    <div class="info-row"><span class="label">Serper.dev API calls</span><span class="value">3-4 searches</span></div>
+    <div class="info-row"><span class="label">Jina.ai page reads</span><span class="value">5-8 visits</span></div>
+  </div>
+</div>
+
+<div style="margin-top:14px;background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:12px;font-size:11px">
+  <strong style="color:var(--sub)">Context window growth:</strong>
+  <div style="margin-top:6px">
+    <svg viewBox="0 0 400 30" style="width:100%;max-width:400px">
+      <!-- base -->
+      <rect x="0" y="8" width="70" height="14" rx="3" fill="var(--s3)" stroke="var(--bd2)" stroke-width="0.5"/>
+      <text x="35" y="18" text-anchor="middle" fill="var(--mut)" font-size="7">R0 sys+user</text>
+      <!-- round 1 -->
+      <rect x="70" y="4" width="60" height="22" rx="3" fill="var(--s3)" stroke="var(--blu)" stroke-width="0.8"/>
+      <text x="100" y="18" text-anchor="middle" fill="var(--blu)" font-size="7">R1</text>
+      <!-- round 2 -->
+      <rect x="130" y="2" width="60" height="26" rx="3" fill="var(--s3)" stroke="var(--yel)" stroke-width="0.8"/>
+      <text x="160" y="18" text-anchor="middle" fill="var(--yel)" font-size="7">R2</text>
+      <!-- round 3 -->
+      <rect x="190" y="1" width="60" height="28" rx="3" fill="var(--s3)" stroke="var(--ora)" stroke-width="0.8"/>
+      <text x="220" y="18" text-anchor="middle" fill="var(--ora)" font-size="7">R3</text>
+      <!-- more -->
+      <rect x="250" y="0" width="60" height="30" rx="3" fill="var(--s3)" stroke="var(--red)" stroke-width="0.8"/>
+      <text x="280" y="18" text-anchor="middle" fill="var(--red)" font-size="7">R4+</text>
+      <!-- cap -->
+      <rect x="310" y="4" width="90" height="22" rx="3" fill="var(--acc-dim)" stroke="var(--acc)" stroke-width="0.8"/>
+      <text x="355" y="18" text-anchor="middle" fill="var(--acc)" font-size="7">cap: 320K</text>
+    </svg>
+  </div>
+  <div style="margin-top:6px;font-size:10px;color:var(--mut)">
+    The context window grows by 1-2K tokens per round. At round 8, you're at ~16K total input.
+    320K max means this can theoretically go 150+ rounds before the model loses history —
+    but in practice the model converges well before that.
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 6. MANUAL vs AGENT -->
+<!-- ============================================================ -->
+<div class="diagram">
+<div class="diagram-title">7 — Manual vs Agent research</div>
+<div class="diagram-sub">Numbers from an actual research session (cold email tactics, ~10 sourced anecdotes)</div>
+
+<table class="comp-table">
+  <thead>
+    <tr><th></th><th>Manual</th><th style="text-align:center"></th><th>Agent</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="metric">Time</td>
+      <td class="val">2-3 hours</td>
+      <td class="vs">→</td>
+      <td class="val" style="color:var(--acc)">~4 minutes</td>
+    </tr>
+    <tr>
+      <td class="metric">Sources read</td>
+      <td class="val">2-3 (typical stopping point)</td>
+      <td class="vs">→</td>
+      <td class="val" style="color:var(--acc)">10+ sourced across forums, blogs, Reddit</td>
+    </tr>
+    <tr>
+      <td class="metric">Cost</td>
+      <td class="val">~$40-60 (your hourly rate)</td>
+      <td class="vs">→</td>
+      <td class="val" style="color:var(--acc)">~$0.30 API cost</td>
+    </tr>
+    <tr>
+      <td class="metric">Coverage</td>
+      <td class="val">Surface-level, one search engine</td>
+      <td class="vs">→</td>
+      <td class="val" style="color:var(--acc)">Multi-query, multi-site, adaptive</td>
+    </tr>
+    <tr>
+      <td class="metric">Structure</td>
+      <td class="val">Scattered notes, browser tabs</td>
+      <td class="vs">→</td>
+      <td class="val" style="color:var(--acc)">Structured report with citations</td>
+    </tr>
+    <tr>
+      <td class="metric">Reproducibility</td>
+      <td class="val">Hard — forgot what you visited</td>
+      <td class="vs">→</td>
+      <td class="val" style="color:var(--acc)">Full log of every search and visit</td>
+    </tr>
+  </tbody>
+</table>
+
+<div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap">
+  <div class="multi-card">
+    <div class="num">40x</div>
+    <div class="lbl">Faster than manual</div>
+  </div>
+  <div class="multi-card">
+    <div class="num">5x</div>
+    <div class="lbl">More sources covered</div>
+  </div>
+  <div class="multi-card">
+    <div class="num">~$0.30</div>
+    <div class="lbl">Cost per deep session</div>
+  </div>
+  <div class="multi-card">
+    <div class="num">10</div>
+    <div class="lbl">Sourced anecdotes</div>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 7. CONFIG / ENV -->
+<!-- ============================================================ -->
+<div class="diagram">
+<div class="diagram-title">8 — Configuration surface</div>
+<div class="diagram-sub">Every lever the system exposes. Change one line and swap providers, adjust behavior.</div>
+
+<div style="display:flex;gap:14px;flex-wrap:wrap">
+  <div style="flex:1;min-width:220px">
+    <div style="font-size:11px;color:var(--sub);margin-bottom:6px">Environment variables</div>
+    <div class="code-line" style="font-size:10px;white-space:normal;margin-bottom:8px">
+      <span class="comment"># Required</span><br>
+      API_KEY=sk-...<br>
+      SERPER_KEY_ID=...<br>
+      JINA_API_KEYS=...<br><br>
+      <span class="comment"># Optional (defaults shown)</span><br>
+      BASE_URL=https://api.deepseek.com/v1<br>
+      MODEL=deepseek-v4-flash<br>
+      MAX_TOOL_ROUNDS=50<br>
+      SUMMARY_MODEL_NAME=(same as MODEL)<br>
+      OUTPUT_DIR=output
+    </div>
+  </div>
+  <div style="flex:1;min-width:180px">
+    <div style="font-size:11px;color:var(--sub);margin-bottom:6px">Provider swap</div>
+    <div style="font-size:11px;margin-bottom:4px">DeepSeek</div>
+    <div class="code-line" style="font-size:9px;white-space:normal;margin-bottom:8px">
+      BASE_URL=https://api.deepseek.com/v1<br>
+      MODEL=deepseek-v4-flash
+    </div>
+    <div style="font-size:11px;margin-bottom:4px">OpenAI</div>
+    <div class="code-line" style="font-size:9px;white-space:normal;margin-bottom:8px">
+      BASE_URL=https://api.openai.com/v1<br>
+      MODEL=gpt-4o
+    </div>
+    <div style="font-size:11px;margin-bottom:4px">OpenRouter</div>
+    <div class="code-line" style="font-size:9px;white-space:normal">
+      BASE_URL=https://openrouter.ai/api/v1<br>
+      MODEL=anthropic/claude-sonnet-20241022
+    </div>
+  </div>
+  <div style="flex:1;min-width:160px">
+    <div style="font-size:11px;color:var(--sub);margin-bottom:6px">LLM parameters</div>
+    <div class="info-row"><span class="label">temperature</span><span class="value">0.6</span></div>
+    <div class="info-row"><span class="label">top_p</span><span class="value">0.95</span></div>
+    <div class="info-row"><span class="label">presence_penalty</span><span class="value">1.1</span></div>
+    <div class="info-row"><span class="label">max_input_tokens</span><span class="value">320,000</span></div>
+    <div class="info-row"><span class="label">max_retries</span><span class="value">10</span></div>
+    <div style="margin-top:10px;font-size:10px;color:var(--mut)">
+      High presence_penalty (1.1) encourages the model to vary its search queries, avoiding getting stuck on the same search terms.
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 8. FILE INVENTORY -->
+<!-- ============================================================ -->
+<div class="diagram">
+<div class="diagram-title">9 — File inventory</div>
+<div class="diagram-sub">Every file and what it contributes. Code origin: verbatim from Alibaba vs new customization.</div>
+
+<div style="overflow-x:auto">
+<table class="comp-table" style="font-size:11px">
+  <thead>
+    <tr><th>File</th><th>Lines</th><th>Purpose</th><th>Origin</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="metric" style="width:160px">harness.py</td><td>~100</td><td>Entry point, API client, output routing</td><td><span class="tag green">New</span></td></tr>
+    <tr><td class="metric">agent.py</td><td>~450</td><td>ReAct loop, tool dispatch, XML parsing</td><td><span class="tag blue">Verbatim Alibaba</span></td></tr>
+    <tr><td class="metric">prompts.py</td><td>~70</td><td>SYSTEM_PROMPT, EXTRACTOR_PROMPT (modified with Source Quality Dashboard guidance)</td><td><span class="tag yel">Adapted</span></td></tr>
+    <tr><td class="metric">settings.py</td><td>~40</td><td>Config — API key, base URL, Serper, Jina</td><td><span class="tag green">New</span></td></tr>
+    <tr><td class="metric">dual_pass.py</td><td>~175</td><td>Dual-pass orchestrator — two harness runs + LLM synthesis</td><td><span class="tag green">New</span></td></tr>
+    <tr><td class="metric">mcp_server.py</td><td>~120</td><td>MCP server — async research jobs</td><td><span class="tag yel">Adapted</span></td></tr>
+    <tr><td class="metric">tools/search.py</td><td>~150</td><td>Serper.dev web search + quality scoring</td><td><span class="tag blue">Verbatim Alibaba</span></td></tr>
+    <tr><td class="metric">tools/visit.py</td><td>~250</td><td>Jina.ai page reader + LLM extractor</td><td><span class="tag blue">Verbatim Alibaba</span></td></tr>
+    <tr><td class="metric">tools/scholar.py</td><td>~140</td><td>Google Scholar via Serper.dev</td><td><span class="tag blue">Verbatim Alibaba</span></td></tr>
+    <tr><td class="metric">source_quality.py</td><td>~417</td><td>Source quality classification engine — domain lookup, path heuristics, snippet keywords, cumulative scoring</td><td><span class="tag green">New</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<div style="margin-top:12px;font-size:10px;color:var(--mut);text-align:center">
+  ~1,700 total lines · 4 new/adapted files · 3 verbatim from Alibaba-NLP/DeepResearch
+</div>
+</div>
+
+<p style="text-align:center;font-size:12px;color:var(--mut);margin-top:40px">
+  <a href="deep-research-agent.html" style="color:var(--sub)">← Case study writeup</a> · <a href="index.html" style="color:var(--sub)">workshown</a>
+</p>
+
+</body>
+</html>

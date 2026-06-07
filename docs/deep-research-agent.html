@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building a Research Agent That Does the Work — Samuel Borelli</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0a;
+  --s1:#121212;
+  --s2:#1a1a1a;
+  --bd:#2a2a2a;
+  --bd2:#333;
+  --acc:#b8f043;
+  --txt:#eeeae2;
+  --sub:#999;
+  --mut:#555;
+}
+body{
+  background:var(--bg);
+  color:var(--txt);
+  font-family:'DM Mono',monospace;
+  font-size:14px;
+  line-height:1.7;
+  max-width:680px;
+  margin:0 auto;
+  padding:48px 24px 96px;
+}
+
+h1{
+  font-family:'DM Serif Display',serif;
+  font-size:28px;
+  font-weight:400;
+  color:var(--txt);
+  line-height:1.25;
+  margin-bottom:8px;
+  letter-spacing:-0.3px;
+}
+h1 em{color:var(--acc);font-style:italic}
+
+.meta{
+  font-size:12px;
+  color:var(--mut);
+  margin-bottom:48px;
+  padding-bottom:24px;
+  border-bottom:1px solid var(--bd);
+}
+
+h2{
+  font-family:'DM Serif Display',serif;
+  font-size:20px;
+  font-weight:400;
+  color:var(--txt);
+  margin-top:48px;
+  margin-bottom:12px;
+  letter-spacing:-0.2px;
+}
+
+p{
+  margin-bottom:16px;
+  color:var(--txt);
+}
+
+a{color:var(--acc);text-decoration:none}
+a:hover{text-decoration:underline}
+
+code{
+  font-family:'DM Mono',monospace;
+  font-size:13px;
+  background:var(--s2);
+  border:1px solid var(--bd);
+  border-radius:4px;
+  padding:1px 6px;
+  color:var(--acc);
+}
+
+ul{
+  list-style:none;
+  padding:0;
+  margin-bottom:20px;
+}
+ul li{
+  padding:3px 0 3px 20px;
+  position:relative;
+}
+ul li::before{
+  content:'→';
+  position:absolute;
+  left:0;
+  color:var(--mut);
+}
+
+blockquote{
+  border-left:2px solid var(--acc);
+  padding:12px 16px;
+  margin:20px 0;
+  background:var(--s1);
+  border-radius:0 6px 6px 0;
+  font-size:13px;
+  color:var(--sub);
+  line-height:1.6;
+}
+
+.divider{
+  border:none;
+  border-top:1px solid var(--bd);
+  margin:40px 0;
+}
+
+.footer{
+  margin-top:64px;
+  padding-top:24px;
+  border-top:1px solid var(--bd);
+  font-size:12px;
+  color:var(--mut);
+}
+.footer a{color:var(--sub)}
+.footer a:hover{color:var(--acc)}
+</style>
+</head>
+<body>
+
+<h1>Building a research agent that <em>does</em> the work</h1>
+<div class="meta">Samuel Borelli · June 2026</div>
+
+<p>
+  I was spending too much time on research. Not the reading — the <em>find the right sources, read them, figure out what they actually mean, put it together</em> loop. That sequence takes hours for any question with depth.
+</p>
+
+<p>
+  The tools exist. Search APIs, content scrapers, LLMs. But they're separate. You search, you get links, you open them, you read, you switch tabs, you synthesize. The friction of moving between tools is where the time goes. I wanted one thing that did the whole loop automatically.
+</p>
+
+<hr class="divider">
+
+<h2>What I built</h2>
+
+<p>
+  A research agent built on Alibaba's ReAct loop — the model drives the research by deciding what to search for, what to read, and when it has enough. Tools execute locally. The model calls <code>&lt;tool_call&gt;</code>, code runs the tool and wraps the result in <code>&lt;tool_response&gt;</code>, the model sees it and decides the next step.
+</p>
+
+<p>
+  But the base loop isn't really the interesting part. What made it useful is what I built on top.
+</p>
+
+<h2>Dual-pass research</h2>
+
+<p>
+  The problem with a single ReAct pass: the model can't hold two perspectives at once. If you tell it to find practitioner stories with real numbers, it will — but it won't also build a structured framework. If you guide it toward structured sourcing, you lose the messy, specific anecdotes that make research feel real.
+</p>
+
+<p>
+  So I built a dual-pass runner. It runs the agent twice:
+</p>
+
+<ul>
+  <li><strong>Pass A</strong> — broad, unfiltered search. No source quality guidance. The model finds practitioner stories, named examples, specific numbers, first-hand accounts.</li>
+  <li><strong>Pass B</strong> — guided search with a source quality system active. Results are classified by credibility tier. Cumulative scores track coverage. The model builds a structured framework.</li>
+  <li><strong>Synthesis</strong> — the LLM merges both reports, weaving Pass A's stories into Pass B's framework as inline evidence.</li>
+</ul>
+
+<p>
+  The result is a report that has both real examples and a usable structure. Either pass alone would be missing something.
+</p>
+
+<blockquote>
+  <code>python src/dual_pass.py "Your research question"</code> — the recommended way to use this.
+</blockquote>
+
+<h2>Source quality system</h2>
+
+<p>
+  The source quality system is the main custom work. Every search result is classified by a rule-based engine — domain lookups against known academic publishers (<code>arxiv.org</code>, <code>pubmed</code>, <code>nature.com</code>, etc.), TLD suffix checks (<code>.gov</code>, <code>.mil</code>), institutional domain matching (<code>who.int</code>, <code>worldbank.org</code>), affiliate path detection, anecdotal snippet keywords, platform host detection for Substack/Medium/Quora/Reddit, and .edu fallback logic.
+</p>
+
+<p>
+  Each result gets a tier label and score. A per-batch dashboard and cumulative running total are appended to every search response. The model passes the cumulative JSON blob forward through tool arguments — not a fragile memory trick, but structured state that persists across rounds because the code hands it back with every call.
+</p>
+
+<p>
+  The whole thing is toggled by a single environment variable. <code>ENABLE_SOURCE_QUALITY=false</code> runs the agent exactly like the base Alibaba code — no classification, no dashboard, no cumulative tracking.
+</p>
+
+<h2>What it produced</h2>
+
+<p>
+  Today I ran it on a question about how regular people (not influencers, not course sellers) actually get jobs. The dual-pass output: 10 sourced anecdotes with real conversion rates from the first pass, a structured tactics framework from the second, and a merged report that weaves the stories into the framework.
+</p>
+
+<blockquote>
+  ~4 minutes per pass. ~$0.30 each. The synthesis merges both into one report. The same research manually would have been 2–3 hours and I would have stopped at 2–3 sources instead of 10.
+</blockquote>
+
+<p>
+  Since then, it's produced three substantial research reports in a single session — cold email tactics, regular people's job-getting methods, and portfolio blog structure analysis. Each one covered more sources than I would have found manually.
+</p>
+
+<h2>What I'd change</h2>
+
+<p>
+  The extractor prompt for page reading misses nuance in opinion-based content. It's built for extracting factual evidence, not reading between the lines of a personal story. A secondary pass focused on tone would help for qualitative research.
+</p>
+
+<p>
+  The cumulative scores are advisory — the model is prompted to use them but nothing enforces it. A proper programmatic gate (pause if score &lt; 40%, or force a scholar-targeted round) would make the quality system drive behavior rather than just annotate it.
+</p>
+
+<hr class="divider">
+
+<h2>The stack</h2>
+
+<ul>
+  <li><strong>Loop:</strong> ReAct protocol from Alibaba-NLP/DeepResearch</li>
+  <li><strong>Search:</strong> Serper.dev API + source quality classification engine</li>
+  <li><strong>Reading:</strong> Jina.ai Reader API + LLM extractor (<code>SUMMARY_MODEL_NAME</code> configurable)</li>
+  <li><strong>Scholar:</strong> Google Scholar via Serper.dev</li>
+  <li><strong>Custom:</strong> <code>source_quality.py</code> — 417-line classification engine, <code>dual_pass.py</code> — 175-line dual-pass orchestrator</li>
+  <li><strong>Server:</strong> MCP protocol wrapper for async dispatch</li>
+  <li><strong>Model:</strong> DeepSeek V4 Flash (any OpenAI-compatible API)</li>
+  <li><strong>Total:</strong> ~1,700 lines across 11 source files</li>
+</ul>
+
+<p style="font-size:12px;color:var(--mut);margin-top:32px">
+  <a href="deep-research-agent-infographic.html" style="color:var(--sub)">Technical infographic →</a>
+</p>
+<div class="footer">
+  <a href="https://github.com/smellyborelli">github</a> · <a href="index.html">workshown</a>
+</div>
+
+</body>
+</html>
