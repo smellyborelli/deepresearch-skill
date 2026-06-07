@@ -290,21 +290,20 @@ p{color:var(--sub);font-size:12px;margin-bottom:12px;line-height:1.5}
     <span class="arrow" style="font-size:20px">↓</span>
   </div>
 
-  <!-- LAYER: Harness -->
-  <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
-    <div class="block acc" style="min-width:140px">
-      <div class="name">harness.py</div>
-      <div class="kind">Entry point · Config · API key</div>
+  <!-- LAYER: Entry points -->
+  <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
+    <div class="block" style="min-width:140px">
+      <div class="name">CLI</div>
+      <div class="kind"><code>python harness.py</code></div>
     </div>
-    <span class="arrow" style="font-size:24px;align-self:center">→</span>
     <div class="block blu" style="min-width:140px">
       <div class="name">mcp_server.py</div>
-      <div class="kind">Async job dispatch</div>
+      <div class="kind">Wraps harness.py · async jobs</div>
     </div>
   </div>
   <div class="flow-row" style="gap:3px">
     <span class="arrow" style="font-size:20px">↓</span>
-    <div><div class="arrow-label">Creates</div></div>
+    <div><div class="arrow-label">Both import harness.run()</div></div>
     <span class="arrow" style="font-size:20px">↓</span>
   </div>
 

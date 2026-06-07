@@ -139,40 +139,45 @@ blockquote{
 <h2>What I built</h2>
 
 <p>
-  A ReAct agent — reasoning loop that searches the web, reads pages, and synthesizes findings into a structured report. It runs via any OpenAI-compatible API. Tools execute locally.
+  A ReAct agent — reasoning loop that searches the web, reads pages, and synthesizes findings into a structured report. It runs via any OpenAI-compatible API. Tools execute locally. The underlying loop is from Alibaba-NLP/DeepResearch — the only custom code is a <code>call_server</code> override that points the model at a configured API instead of a local GPU.
 </p>
 
-<p>The loop:</p>
+<p>The protocol is XML-based:</p>
 
 <ul>
-  <li>Send the question to the model</li>
-  <li>Model decides: search, read a page, or answer</li>
-  <li>Execute the tool locally (Serper.dev for search, Jina.ai for reading)</li>
-  <li>Feed the result back into context</li>
-  <li>Repeat until the model says it has enough</li>
+  <li>Model responds with <code>&lt;tool_call&gt;</code> containing JSON arguments</li>
+  <li>Code parses, executes the tool, wraps result in <code>&lt;tool_response&gt;</code></li>
+  <li>Feed back into context</li>
+  <li>Repeat until the model emits <code>&lt;answer&gt;</code></li>
 </ul>
 
 <p>Max 50 rounds per session. Usually takes 4–8.</p>
 
-<h2>How it decides what to search for</h2>
+<h2>Three tools, not two</h2>
 
 <p>
-  The model drives, not the code. It decides the search queries, picks which pages to read, and determines when it has enough information. The code just handles tool execution and passes results back.
+  <strong>Search</strong> — Serper.dev Google search API. Batched queries (pass an array of queries in one call). Results include a Source Quality Dashboard: each result is classified into tiers (peer-reviewed, scholarly/gov, anecdotal/interview, blog/news, affiliate) with a cumulative weighted score that persists across rounds.
 </p>
 
 <p>
-  This means the same agent handles a shallow question in 2 rounds and a deep one in 15 — no code changes, no configuration. The model adapts to the question.
-</p>
-
-<h2>How pages get read</h2>
-
-<p>
-  Jina.ai takes a URL and returns markdown. For long pages, I truncate and use a secondary LLM call to extract what's relevant. The extractor returns three things: why the page is relevant, the supporting quotes, and a condensed summary.
+  <strong>Visit</strong> — Jina.ai Reader API fetches a URL as markdown. Long pages are truncated to ~95K tokens (tiktoken cl100k_base encoding). A secondary LLM call extracts <code>{rational, evidence, summary}</code> — why it's relevant, the supporting quotes, and a condensed version. The extractor retries up to 3 times with progressive truncation if output is too short.
 </p>
 
 <p>
-  The two-step approach means the agent reads summaries with citations, not full pages. Keeps costs down and lets it cover more sources per session.
+  <strong>Scholar</strong> — Google Scholar via Serper.dev for academic sources. Same Source Quality Dashboard and cumulative scoring.
 </p>
+
+<h2>How the model uses source quality</h2>
+
+<p>
+  The system prompt instructs the model to track source quality across rounds. The cumulative score is passed back as a parameter on every subsequent search call. If the weighted total stays below 40% after several rounds, the model is told to try more targeted searches. Above 70%, it can proceed to answer.
+</p>
+
+<p>
+  Tier 3 (anecdotal/interview, 3 points) is explicitly called out as "often the most useful for real-world, practical research" — the prompt is written to value qualitative sources appropriately, not treat them as inherently weaker than institutional sources.
+</p>
+
+<h2>What it produced</h2>
 
 <h2>What it produced</h2>
 
@@ -199,12 +204,13 @@ blockquote{
 <h2>The stack</h2>
 
 <ul>
-  <li><strong>Loop:</strong> ReAct protocol from Alibaba-NLP/DeepResearch</li>
-  <li><strong>Search:</strong> Serper.dev API</li>
-  <li><strong>Reading:</strong> Jina.ai Reader API + LLM extractor</li>
-  <li><strong>Model:</strong> DeepSeek V4 Flash (any OpenAI-compatible API works)</li>
-  <li><strong>Server:</strong> MCP protocol wrapper for async dispatch</li>
-  <li><strong>Total:</strong> ~400 lines across 6 files</li>
+  <li><strong>Loop:</strong> ReAct protocol from Alibaba-NLP/DeepResearch (verbatim)</li>
+  <li><strong>Search:</strong> Serper.dev API + Source Quality Dashboard</li>
+  <li><strong>Reading:</strong> Jina.ai Reader API + LLM extractor (summary model can differ from main model via <code>SUMMARY_MODEL_NAME</code>)</li>
+  <li><strong>Scholar:</strong> Google Scholar via Serper.dev</li>
+  <li><strong>Server:</strong> MCP protocol wrapper for async job dispatch</li>
+  <li><strong>Model:</strong> DeepSeek V4 Flash (any OpenAI-compatible API — swap <code>BASE_URL</code> + <code>API_KEY</code>)</li>
+  <li><strong>Total:</strong> ~1,420 lines across 9 files (3 new/adapted, 6 verbatim Alibaba)</li>
 </ul>
 
 <p style="font-size:12px;color:var(--mut);margin-top:32px">
