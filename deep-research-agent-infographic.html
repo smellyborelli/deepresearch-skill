@@ -264,7 +264,7 @@ p{color:var(--sub);font-size:12px;margin-bottom:12px;line-height:1.5}
 <body>
 
 <h1>Deep research agent · <em>technical</em></h1>
-<div class="meta">System architecture, protocol flow, tool internals &amp; cost model</div>
+<div class="meta">Dual-pass system, architecture, protocol flow, tool internals, source quality engine &amp; cost model</div>
 
 <!-- ============================================================ -->
 <!-- 1. SYSTEM ARCHITECTURE -->
@@ -283,27 +283,29 @@ p{color:var(--sub);font-size:12px;margin-bottom:12px;line-height:1.5}
     </div>
   </div>
 
-  <!-- Arrow row -->
   <div class="flow-row" style="gap:3px">
-    <span class="arrow" style="font-size:20px">↓</span>
-    <div><div class="arrow-label">Skill invoke</div></div>
     <span class="arrow" style="font-size:20px">↓</span>
   </div>
 
   <!-- LAYER: Entry points -->
   <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
+    <div class="block acc" style="min-width:160px">
+      <div class="name">dual_pass.py</div>
+      <div class="kind">Recommended · Two passes + synthesis</div>
+    </div>
     <div class="block" style="min-width:140px">
-      <div class="name">CLI</div>
-      <div class="kind"><code>python harness.py</code></div>
+      <div class="name">harness.py</div>
+      <div class="kind">Single pass (quality optional)</div>
     </div>
     <div class="block blu" style="min-width:140px">
       <div class="name">mcp_server.py</div>
-      <div class="kind">Wraps harness.py · async jobs</div>
+      <div class="kind">Wraps harness · Async jobs</div>
     </div>
   </div>
+
   <div class="flow-row" style="gap:3px">
     <span class="arrow" style="font-size:20px">↓</span>
-    <div><div class="arrow-label">Both import harness.run()</div></div>
+    <div style="text-align:center;font-size:9px;color:var(--mut);padding:2px 8px">dual_pass orchestrates two harness runs + LLM synthesis</div>
     <span class="arrow" style="font-size:20px">↓</span>
   </div>
 
@@ -361,10 +363,71 @@ p{color:var(--sub);font-size:12px;margin-bottom:12px;line-height:1.5}
 </div>
 
 <!-- ============================================================ -->
-<!-- 2. REACT LOOP — DETAILED -->
+<!-- 2. DUAL-PASS SYSTEM -->
 <!-- ============================================================ -->
 <div class="diagram">
-<div class="diagram-title">2 — The ReAct loop (message-level)</div>
+<div class="diagram-title">2 — Dual-pass research system</div>
+<div class="diagram-sub">The recommended workflow. Two passes with different source quality modes, merged by an LLM synthesis step.</div>
+
+<div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+
+  <div class="block acc" style="min-width:200px">
+    <div class="name">dual_pass.py</div>
+    <div class="kind">Entry point — orchestrates both passes</div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <!-- Branch -->
+  <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap">
+
+    <!-- Pass A -->
+    <div style="flex:1;min-width:220px;max-width:300px;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;padding:12px">
+      <div style="text-align:center;font-size:11px;font-weight:500;margin-bottom:8px;color:var(--yel)">Pass A — Practitioner stories</div>
+      <div style="font-size:10px;color:var(--sub);margin-bottom:6px">ENABLE_SOURCE_QUALITY=<strong style="color:var(--red)">false</strong></div>
+      <ul style="font-size:10px;color:var(--mut);margin:0;padding:0">
+        <li style="padding:2px 0 2px 12px;position:relative;list-style:none;::before{content:'•'}">Broad, unfiltered web search</li>
+        <li style="padding:2px 0 2px 12px;position:relative;list-style:none">No source classification</li>
+        <li style="padding:2px 0 2px 12px;position:relative;list-style:none">No dashboard or scoring</li>
+        <li style="padding:2px 0 2px 12px;position:relative;list-style:none">Rich in named examples, numbers</li>
+      </ul>
+      <div style="margin-top:6px;font-size:9px;color:var(--mut)">→ output/*_PassA.md</div>
+    </div>
+
+    <!-- Pass B -->
+    <div style="flex:1;min-width:220px;max-width:300px;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;padding:12px">
+      <div style="text-align:center;font-size:11px;font-weight:500;margin-bottom:8px;color:var(--blu)">Pass B — Structured framework</div>
+      <div style="font-size:10px;color:var(--sub);margin-bottom:6px">ENABLE_SOURCE_QUALITY=<strong style="color:var(--acc)">true</strong></div>
+      <ul style="font-size:10px;color:var(--mut);margin:0;padding:0">
+        <li style="padding:2px 0 2px 12px">Quality-guided search</li>
+        <li style="padding:2px 0 2px 12px">Tier classification per result</li>
+        <li style="padding:2px 0 2px 12px">Cumulative scoring across rounds</li>
+        <li style="padding:2px 0 2px 12px">Structured framework output</li>
+      </ul>
+      <div style="margin-top:6px;font-size:9px;color:var(--mut)">→ output/*_PassB.md</div>
+    </div>
+  </div>
+
+  <!-- Synthesis -->
+  <div class="arrow">↓</div>
+  <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
+    <div class="block purp" style="min-width:220px">
+      <div class="name">LLM Synthesis</div>
+      <div class="kind">Merges Pass A stories into Pass B's structure → output/*_Report.md</div>
+    </div>
+  </div>
+
+  <div style="font-size:10px;color:var(--mut);margin-top:4px">
+    Both runs share the same API key and rate limits. Recovery: if a pass fails, partial output is preserved and no synthesis is attempted — the user can manually merge.
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 3. REACT LOOP — DETAILED -->
+<!-- ============================================================ -->
+<div class="diagram">
+<div class="diagram-title">3 — The ReAct loop (message-level)</div>
 <div class="diagram-sub">Every round: model decides → tool executes → result feeds back. The loop drives itself.</div>
 
 <div style="display:flex;gap:16px;flex-wrap:wrap">
@@ -485,7 +548,7 @@ p{color:var(--sub);font-size:12px;margin-bottom:12px;line-height:1.5}
 <!-- 3. TOOL INTERNALS -->
 <!-- ============================================================ -->
 <div class="diagram">
-<div class="diagram-title">3 — Tool internals</div>
+<div class="diagram-title">4 — Tool internals</div>
 <div class="diagram-sub">Two primary tools and what they produce.</div>
 
 <div style="display:flex;gap:14px;flex-wrap:wrap">
@@ -520,7 +583,7 @@ p{color:var(--sub);font-size:12px;margin-bottom:12px;line-height:1.5}
       <div class="step-num">3</div>
       <div class="step-body">
         <div class="step-title">Append Source Quality Dashboard</div>
-        <div class="step-detail">Scores each result by tier, updates cumulative running count, appends to response.</div>
+        <div class="step-detail">Scores each result by tier, updates cumulative running count, appends to response. Skipped when <code>ENABLE_SOURCE_QUALITY=false</code>.</div>
       </div>
     </div>
 
@@ -589,14 +652,26 @@ p{color:var(--sub);font-size:12px;margin-bottom:12px;line-height:1.5}
 <!-- 4. SOURCE QUALITY DASHBOARD -->
 <!-- ============================================================ -->
 <div class="diagram">
-<div class="diagram-title">4 — Source Quality Dashboard</div>
+<div class="diagram-title">5 — Source Quality Dashboard</div>
 <div class="diagram-sub">Every search result is scored by credibility tier. Running cumulative score tracks coverage across rounds.</div>
 
 <p>
-  The first thing our custom agent does differently from base Alibaba is the Source Quality Dashboard.
-  After each search, results are classified into 5 tiers and a weighted score is computed.
-  The cumulative score persists across rounds — the model passes it back as <code>cumulative_scores</code>
-  on every subsequent search call.
+  The main custom code is <code>source_quality.py</code> — a 417-line classification engine that runs on
+  every search result. Each result's domain, URL path, and snippet are checked against known academic
+  publishers, government TLDs, institutional domains, affiliate patterns, anecdotal keywords, and
+  platform hosts. A tier label, score, per-batch dashboard, and cumulative running total are appended
+  to every search tool response.
+</p>
+<p>
+  The cumulative score is carried across rounds via a structured state-passing pattern — the model
+  passes the JSON blob from the last dashboard as <code>cumulative_scores</code> in its next search
+  call's arguments. The code merges the new batch and hands back the updated tally. If the model
+  forgets, it starts fresh — no functional breakage.
+</p>
+<p>
+  The entire system can be toggled off with <code>ENABLE_SOURCE_QUALITY=false</code> — the agent runs
+  exactly like the base Alibaba code, no classification, no dashboard. This toggle is how the dual-pass
+  runner switches between its two research modes.
 </p>
 
 <!-- TIERS -->
@@ -667,7 +742,7 @@ p{color:var(--sub);font-size:12px;margin-bottom:12px;line-height:1.5}
 <!-- 5. TOKEN ANATOMY -->
 <!-- ============================================================ -->
 <div class="diagram">
-<div class="diagram-title">5 — Token anatomy per round</div>
+<div class="diagram-title">6 — Token anatomy per round</div>
 <div class="diagram-sub">What fills up the context window each iteration. The context window grows with every round.</div>
 
 <div style="display:flex;gap:14px;flex-wrap:wrap">
@@ -727,7 +802,7 @@ p{color:var(--sub);font-size:12px;margin-bottom:12px;line-height:1.5}
 <!-- 6. MANUAL vs AGENT -->
 <!-- ============================================================ -->
 <div class="diagram">
-<div class="diagram-title">6 — Manual vs Agent research</div>
+<div class="diagram-title">7 — Manual vs Agent research</div>
 <div class="diagram-sub">Numbers from an actual research session (cold email tactics, ~10 sourced anecdotes)</div>
 
 <table class="comp-table">
@@ -798,7 +873,7 @@ p{color:var(--sub);font-size:12px;margin-bottom:12px;line-height:1.5}
 <!-- 7. CONFIG / ENV -->
 <!-- ============================================================ -->
 <div class="diagram">
-<div class="diagram-title">7 — Configuration surface</div>
+<div class="diagram-title">8 — Configuration surface</div>
 <div class="diagram-sub">Every lever the system exposes. Change one line and swap providers, adjust behavior.</div>
 
 <div style="display:flex;gap:14px;flex-wrap:wrap">
@@ -853,7 +928,7 @@ p{color:var(--sub);font-size:12px;margin-bottom:12px;line-height:1.5}
 <!-- 8. FILE INVENTORY -->
 <!-- ============================================================ -->
 <div class="diagram">
-<div class="diagram-title">8 — File inventory</div>
+<div class="diagram-title">9 — File inventory</div>
 <div class="diagram-sub">Every file and what it contributes. Code origin: verbatim from Alibaba vs new customization.</div>
 
 <div style="overflow-x:auto">
@@ -864,19 +939,20 @@ p{color:var(--sub);font-size:12px;margin-bottom:12px;line-height:1.5}
   <tbody>
     <tr><td class="metric" style="width:160px">harness.py</td><td>~100</td><td>Entry point, API client, output routing</td><td><span class="tag green">New</span></td></tr>
     <tr><td class="metric">agent.py</td><td>~450</td><td>ReAct loop, tool dispatch, XML parsing</td><td><span class="tag blue">Verbatim Alibaba</span></td></tr>
-    <tr><td class="metric">prompts.py</td><td>~70</td><td>SYSTEM_PROMPT, EXTRACTOR_PROMPT</td><td><span class="tag blue">Verbatim Alibaba</span></td></tr>
+    <tr><td class="metric">prompts.py</td><td>~70</td><td>SYSTEM_PROMPT, EXTRACTOR_PROMPT (modified with Source Quality Dashboard guidance)</td><td><span class="tag yel">Adapted</span></td></tr>
     <tr><td class="metric">settings.py</td><td>~40</td><td>Config — API key, base URL, Serper, Jina</td><td><span class="tag green">New</span></td></tr>
+    <tr><td class="metric">dual_pass.py</td><td>~175</td><td>Dual-pass orchestrator — two harness runs + LLM synthesis</td><td><span class="tag green">New</span></td></tr>
     <tr><td class="metric">mcp_server.py</td><td>~120</td><td>MCP server — async research jobs</td><td><span class="tag yel">Adapted</span></td></tr>
     <tr><td class="metric">tools/search.py</td><td>~150</td><td>Serper.dev web search + quality scoring</td><td><span class="tag blue">Verbatim Alibaba</span></td></tr>
     <tr><td class="metric">tools/visit.py</td><td>~250</td><td>Jina.ai page reader + LLM extractor</td><td><span class="tag blue">Verbatim Alibaba</span></td></tr>
     <tr><td class="metric">tools/scholar.py</td><td>~140</td><td>Google Scholar via Serper.dev</td><td><span class="tag blue">Verbatim Alibaba</span></td></tr>
-    <tr><td class="metric">source_quality.py</td><td>~100</td><td>Source tier classification + dashboard</td><td><span class="tag green">New</span></td></tr>
+    <tr><td class="metric">source_quality.py</td><td>~417</td><td>Source quality classification engine — domain lookup, path heuristics, snippet keywords, cumulative scoring</td><td><span class="tag green">New</span></td></tr>
   </tbody>
 </table>
 </div>
 
 <div style="margin-top:12px;font-size:10px;color:var(--mut);text-align:center">
-  ~1,420 total lines · 6 new/adapted files · 3 verbatim from Alibaba-NLP/DeepResearch
+  ~1,700 total lines · 4 new/adapted files · 3 verbatim from Alibaba-NLP/DeepResearch
 </div>
 </div>
 

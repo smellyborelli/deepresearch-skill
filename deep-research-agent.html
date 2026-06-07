@@ -139,64 +139,73 @@ blockquote{
 <h2>What I built</h2>
 
 <p>
-  A ReAct agent — reasoning loop that searches the web, reads pages, and synthesizes findings into a structured report. It runs via any OpenAI-compatible API. Tools execute locally. The underlying loop is from Alibaba-NLP/DeepResearch — the only custom code is a <code>call_server</code> override that points the model at a configured API instead of a local GPU.
+  A research agent built on Alibaba's ReAct loop — the model drives the research by deciding what to search for, what to read, and when it has enough. Tools execute locally. The model calls <code>&lt;tool_call&gt;</code>, code runs the tool and wraps the result in <code>&lt;tool_response&gt;</code>, the model sees it and decides the next step.
 </p>
 
-<p>The protocol is XML-based:</p>
+<p>
+  But the base loop isn't really the interesting part. What made it useful is what I built on top.
+</p>
+
+<h2>Dual-pass research</h2>
+
+<p>
+  The problem with a single ReAct pass: the model can't hold two perspectives at once. If you tell it to find practitioner stories with real numbers, it will — but it won't also build a structured framework. If you guide it toward structured sourcing, you lose the messy, specific anecdotes that make research feel real.
+</p>
+
+<p>
+  So I built a dual-pass runner. It runs the agent twice:
+</p>
 
 <ul>
-  <li>Model responds with <code>&lt;tool_call&gt;</code> containing JSON arguments</li>
-  <li>Code parses, executes the tool, wraps result in <code>&lt;tool_response&gt;</code></li>
-  <li>Feed back into context</li>
-  <li>Repeat until the model emits <code>&lt;answer&gt;</code></li>
+  <li><strong>Pass A</strong> — broad, unfiltered search. No source quality guidance. The model finds practitioner stories, named examples, specific numbers, first-hand accounts.</li>
+  <li><strong>Pass B</strong> — guided search with a source quality system active. Results are classified by credibility tier. Cumulative scores track coverage. The model builds a structured framework.</li>
+  <li><strong>Synthesis</strong> — the LLM merges both reports, weaving Pass A's stories into Pass B's framework as inline evidence.</li>
 </ul>
 
-<p>Max 50 rounds per session. Usually takes 4–8.</p>
-
-<h2>Three tools, not two</h2>
-
 <p>
-  <strong>Search</strong> — Serper.dev Google search API. Batched queries (pass an array of queries in one call). Results include a Source Quality Dashboard: each result is classified into tiers (peer-reviewed, scholarly/gov, anecdotal/interview, blog/news, affiliate) with a cumulative weighted score that persists across rounds.
-</p>
-
-<p>
-  <strong>Visit</strong> — Jina.ai Reader API fetches a URL as markdown. Long pages are truncated to ~95K tokens (tiktoken cl100k_base encoding). A secondary LLM call extracts <code>{rational, evidence, summary}</code> — why it's relevant, the supporting quotes, and a condensed version. The extractor retries up to 3 times with progressive truncation if output is too short.
-</p>
-
-<p>
-  <strong>Scholar</strong> — Google Scholar via Serper.dev for academic sources. Same Source Quality Dashboard and cumulative scoring.
-</p>
-
-<h2>How the model uses source quality</h2>
-
-<p>
-  The system prompt instructs the model to track source quality across rounds. The cumulative score is passed back as a parameter on every subsequent search call. If the weighted total stays below 40% after several rounds, the model is told to try more targeted searches. Above 70%, it can proceed to answer.
-</p>
-
-<p>
-  Tier 3 (anecdotal/interview, 3 points) is explicitly called out as "often the most useful for real-world, practical research" — the prompt is written to value qualitative sources appropriately, not treat them as inherently weaker than institutional sources.
-</p>
-
-<h2>What it produced</h2>
-
-<h2>What it produced</h2>
-
-<p>
-  I ran it on a question about how regular people (not influencers, not course sellers) actually get jobs. The agent searched Reddit threads, read personal blogs, found forum discussions, and returned 10 sourced anecdotes with real conversion rates &mdash; 1.2% from 847 cold emails, 45% view rate on Upwork proposals, a summary table comparing tactics.
+  The result is a report that has both real examples and a usable structure. Either pass alone would be missing something.
 </p>
 
 <blockquote>
-  ~4 minutes. ~$0.30. The same research manually would have been 2–3 hours, and I would have stopped at 2–3 sources instead of 10.
+  <code>python src/dual_pass.py "Your research question"</code> — the recommended way to use this.
 </blockquote>
+
+<h2>Source quality system</h2>
+
+<p>
+  The source quality system is the main custom work. Every search result is classified by a rule-based engine — domain lookups against known academic publishers (<code>arxiv.org</code>, <code>pubmed</code>, <code>nature.com</code>, etc.), TLD suffix checks (<code>.gov</code>, <code>.mil</code>), institutional domain matching (<code>who.int</code>, <code>worldbank.org</code>), affiliate path detection, anecdotal snippet keywords, platform host detection for Substack/Medium/Quora/Reddit, and .edu fallback logic.
+</p>
+
+<p>
+  Each result gets a tier label and score. A per-batch dashboard and cumulative running total are appended to every search response. The model passes the cumulative JSON blob forward through tool arguments — not a fragile memory trick, but structured state that persists across rounds because the code hands it back with every call.
+</p>
+
+<p>
+  The whole thing is toggled by a single environment variable. <code>ENABLE_SOURCE_QUALITY=false</code> runs the agent exactly like the base Alibaba code — no classification, no dashboard, no cumulative tracking.
+</p>
+
+<h2>What it produced</h2>
+
+<p>
+  Today I ran it on a question about how regular people (not influencers, not course sellers) actually get jobs. The dual-pass output: 10 sourced anecdotes with real conversion rates from the first pass, a structured tactics framework from the second, and a merged report that weaves the stories into the framework.
+</p>
+
+<blockquote>
+  ~4 minutes per pass. ~$0.30 each. The synthesis merges both into one report. The same research manually would have been 2–3 hours and I would have stopped at 2–3 sources instead of 10.
+</blockquote>
+
+<p>
+  Since then, it's produced three substantial research reports in a single session — cold email tactics, regular people's job-getting methods, and portfolio blog structure analysis. Each one covered more sources than I would have found manually.
+</p>
 
 <h2>What I'd change</h2>
 
 <p>
-  The extractor prompt misses nuance in opinion-based content. It's built for extracting factual evidence, not reading between the lines. A secondary pass focused on tone would help for the kind of qualitative research I do most.
+  The extractor prompt for page reading misses nuance in opinion-based content. It's built for extracting factual evidence, not reading between the lines of a personal story. A secondary pass focused on tone would help for qualitative research.
 </p>
 
 <p>
-  The report output is a flat markdown file. For longer sessions the structure works, but for quick questions I'd prefer summary-first with depth available on demand.
+  The cumulative scores are advisory — the model is prompted to use them but nothing enforces it. A proper programmatic gate (pause if score &lt; 40%, or force a scholar-targeted round) would make the quality system drive behavior rather than just annotate it.
 </p>
 
 <hr class="divider">
@@ -204,13 +213,14 @@ blockquote{
 <h2>The stack</h2>
 
 <ul>
-  <li><strong>Loop:</strong> ReAct protocol from Alibaba-NLP/DeepResearch (verbatim)</li>
-  <li><strong>Search:</strong> Serper.dev API + Source Quality Dashboard</li>
-  <li><strong>Reading:</strong> Jina.ai Reader API + LLM extractor (summary model can differ from main model via <code>SUMMARY_MODEL_NAME</code>)</li>
+  <li><strong>Loop:</strong> ReAct protocol from Alibaba-NLP/DeepResearch</li>
+  <li><strong>Search:</strong> Serper.dev API + source quality classification engine</li>
+  <li><strong>Reading:</strong> Jina.ai Reader API + LLM extractor (<code>SUMMARY_MODEL_NAME</code> configurable)</li>
   <li><strong>Scholar:</strong> Google Scholar via Serper.dev</li>
-  <li><strong>Server:</strong> MCP protocol wrapper for async job dispatch</li>
-  <li><strong>Model:</strong> DeepSeek V4 Flash (any OpenAI-compatible API — swap <code>BASE_URL</code> + <code>API_KEY</code>)</li>
-  <li><strong>Total:</strong> ~1,420 lines across 9 files (3 new/adapted, 6 verbatim Alibaba)</li>
+  <li><strong>Custom:</strong> <code>source_quality.py</code> — 417-line classification engine, <code>dual_pass.py</code> — 175-line dual-pass orchestrator</li>
+  <li><strong>Server:</strong> MCP protocol wrapper for async dispatch</li>
+  <li><strong>Model:</strong> DeepSeek V4 Flash (any OpenAI-compatible API)</li>
+  <li><strong>Total:</strong> ~1,700 lines across 11 source files</li>
 </ul>
 
 <p style="font-size:12px;color:var(--mut);margin-top:32px">
