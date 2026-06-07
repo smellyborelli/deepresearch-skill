@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "deep-research": {
+      "command": "python",
+      "args": [
+        "src/mcp_server.py"
+      ],
+      "env": {
+        "API_KEY": "${API_KEY}",
+        "BASE_URL": "https://api.deepseek.com/v1",
+        "MODEL": "deepseek-v4-flash",
+        "SERPER_KEY_ID": "${SERPER_KEY_ID}",
+        "JINA_API_KEYS": "${JINA_API_KEYS}"
+      }
+    }
+  }
+}
